@@ -7,7 +7,7 @@ import time
 print("=== P2P CHAT APP ===")
 MY_DOMAIN = input("Masukkan Username/Domain kamu (contoh: alice): ")
 DNS_IP = input("Masukkan IP Laptop Server DNS: ") # Minta IP Laptop server
-DNS_PORT = 5353
+DNS_PORT = 9999
 MY_CHAT_PORT = 5000 
 
 # Ambil IP Laptop sendiri secara otomatis

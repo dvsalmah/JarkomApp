@@ -3,7 +3,7 @@ import json
 
 # konfig server
 SERVER_IP = '0.0.0.0'  
-SERVER_PORT = 5353     
+SERVER_PORT = 9999     
 
 dns_records = {}
 
