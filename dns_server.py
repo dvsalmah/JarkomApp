@@ -1,8 +1,8 @@
 import socket
 import json
 
-# konfig server
-SERVER_IP = '0.0.0.0'  
+#konfig server
+SERVER_IP = '0.0.0.0'   
 SERVER_PORT = 9999     
 
 dns_records = {}
@@ -12,28 +12,22 @@ def start_dns_server():
     sock.bind((SERVER_IP, SERVER_PORT))
     
     print(f"[*] DNS Server berjalan di Port {SERVER_PORT}...")
-    print(f"[*] Menunggu client untuk Register/Query...")
+    print(f"[*] Menunggu client (Register / Query / Get Users)...")
 
     while True:
         try:
-            # Menerima paket dari client
-            data, addr = sock.recvfrom(1024)
             try:
-                data, addr = sock.recvfrom(1024)
+                data, addr = sock.recvfrom(4096)
             except ConnectionResetError:
-                # Ini untuk menangani WinError 10054
                 continue 
             except OSError as e:
-                if e.winerror == 10054:
-                    continue
-                else:
-                    raise e
+                if e.winerror == 10054: continue
+                else: raise e
                 
             request = json.loads(data.decode())
             response = {}
             command = request.get('type')
             
-            # fitur register (Mencatat user baru) [cite: 17]
             if command == 'REGISTER':
                 domain = request.get('domain')
                 ip = request.get('ip')
@@ -41,7 +35,6 @@ def start_dns_server():
                 print(f"[+] REGISTER: {domain} -> {ip} (dari {addr})")
                 response = {"status": "OK", "message": f"{domain} registered"}
             
-            # fitur query (Mencari IP teman) [cite: 17]
             elif command == 'QUERY':
                 domain = request.get('domain')
                 target_ip = dns_records.get(domain)
@@ -52,6 +45,14 @@ def start_dns_server():
                 else:
                     print(f"[!] QUERY: Mencari {domain} -> TIDAK DITEMUKAN")
                     response = {"status": "NOT_FOUND"}
+
+            elif command == 'GET_USERS':
+                online_list = []
+                for user, ip_addr in dns_records.items():
+                    online_list.append({"username": user, "ip": ip_addr})
+                
+                print(f"[i] GET_USERS: Mengirim {len(online_list)} user ke {addr}")
+                response = {"status": "OK", "users": online_list}
             
             sock.sendto(json.dumps(response).encode(), addr)
             

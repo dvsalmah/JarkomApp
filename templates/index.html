@@ -3,118 +3,260 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jarkom Chat App</title>
+    <title>P2P Chat LAN</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; }
+        /* Utilitas untuk menyembunyikan layar */
+        .hidden-screen { display: none !important; }
+        
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: #f1f1f1; }
-        ::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
-        ::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
     </style>
 </head>
 
-<body class="bg-gray-100 h-screen flex items-center justify-center">
-    
-    <div class="w-full max-w-md bg-white h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200">
-        
-        <div class="bg-rose-600 p-4 text-white shadow-md z-10 shrink-0">
-            <div class="flex items-center justify-between">
-                <div>
-                    <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"/>
-                        </svg>
-                        <span class="font-bold text-lg">{{ username }}</span>
+<body class="bg-slate-100 h-screen flex items-center justify-center p-4">
+
+    <div class="w-full max-w-md bg-white h-[85vh] rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-gray-200 relative">
+
+        <div id="home-screen" class="flex flex-col h-full">
+            <div class="bg-rose-600 p-6 text-white shadow-md shrink-0">
+                <div class="flex justify-between items-start">
+                    <div>
+                        <h1 class="text-2xl font-bold mb-1">Halo, {{ username }}!</h1>
+                        <p class="text-rose-100 text-sm opacity-90">Pilih teman untuk chat P2P</p>
                     </div>
-                    <p class="text-xs text-rose-100 opacity-90 mt-1">IP: {{ ip }} • Port: {{ port }}</p>
+                    <div class="bg-rose-700/50 p-2 rounded-lg text-xs text-right">
+                        <p class="font-mono">{{ ip }}</p>
+                        <p class="opacity-75">Port: {{ port }}</p>
+                    </div>
                 </div>
-                <div class="h-3 w-3 bg-green-500 rounded-full animate-pulse" title="Online"></div>
             </div>
-        </div>
 
-        <div id="chat-display" class="flex-1 bg-slate-50 p-4 overflow-y-auto space-y-3 flex flex-col">
-            <div class="text-center text-xs text-gray-400 my-4">
-                <span class="bg-gray-200 px-3 py-1 rounded-full">Mulai percakapan aman P2P</span>
-            </div>
-        </div>
-
-        <div class="bg-white p-3 border-t border-gray-100 shrink-0">
-            <div class="mb-2">
-                <input type="text" id="targetUser" 
-                    class="w-full bg-gray-100 text-sm px-3 py-2 rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500 transition" 
-                    placeholder="Chat siapa? (cth: budi)">
-            </div>
-            
-            <div class="flex gap-2">
-                <input type="text" id="messageInput" 
-                    class="flex-1 bg-gray-100 px-4 py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500 transition" 
-                    placeholder="Ketik pesan...">
+            <div class="flex-1 p-4 overflow-y-auto bg-slate-50">
+                <h2 class="text-gray-500 text-xs font-bold uppercase tracking-wider mb-3 ml-1">User Online (LAN)</h2>
                 
-                <button onclick="sendMessage()" 
-                    class="bg-rose-600 hover:bg-rose-700 text-white h-12 w-12 rounded-full flex items-center justify-center shadow-lg transition active:scale-90">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90" viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                <div id="user-list-container" class="space-y-3">
+                    <div class="animate-pulse flex space-x-4 bg-white p-3 rounded-xl">
+                        <div class="rounded-full bg-slate-200 h-10 w-10"></div>
+                        <div class="flex-1 space-y-2 py-1">
+                            <div class="h-2 bg-slate-200 rounded"></div>
+                            <div class="h-2 bg-slate-200 rounded w-5/6"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="chat-screen" class="flex flex-col h-full hidden-screen">
+            
+            <div class="bg-rose-600 p-3 text-white shadow-md z-10 shrink-0 flex items-center gap-3">
+                <button onclick="backToHome()" class="p-2 hover:bg-rose-700 rounded-full transition">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="size-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
                     </svg>
                 </button>
+
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 bg-white/20 rounded-full flex items-center justify-center font-bold text-sm border border-white/30">
+                        <span id="chat-target-initial">?</span>
+                    </div>
+                    <div>
+                        <span id="chat-target-name" class="font-bold text-base block leading-tight">User</span>
+                        <div class="flex items-center gap-1">
+                            <span class="w-2 h-2 bg-green-400 rounded-full"></span>
+                            <span class="text-xs text-rose-100 opacity-90">Online</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div id="chat-display" class="flex-1 bg-slate-50 p-4 overflow-y-auto space-y-3 flex flex-col">
+                <div class="text-center text-xs text-gray-400 my-4">
+                    <span class="bg-gray-200 px-3 py-1 rounded-full">Mulai percakapan aman</span>
+                </div>
+            </div>
+
+            <div class="bg-white p-3 border-t border-gray-100 shrink-0">
+                <div class="flex gap-2 items-center">
+                    <input type="text" id="messageInput" 
+                        class="flex-1 bg-gray-100 text-sm px-4 py-3 rounded-full focus:outline-none focus:ring-2 focus:ring-rose-500 transition" 
+                        placeholder="Ketik pesan..." autocomplete="off">
+                    
+                    <button onclick="sendMessage()" 
+                        class="bg-rose-600 hover:bg-rose-700 text-white h-10 w-10 rounded-full flex items-center justify-center shadow-lg transition active:scale-90">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform rotate-90 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                            <path d="M10.894 2.553a1 1 0 00-1.788 0l-7 14a1 1 0 001.169 1.409l5-1.429A1 1 0 009 15.571V11a1 1 0 112 0v4.571a1 1 0 00.725.962l5 1.428a1 1 0 001.17-1.408l-7-14z" />
+                        </svg>
+                    </button>
+                </div>
             </div>
         </div>
 
-    </div> <script>
+    </div> 
+
+    <script>
+        const myUsername = "{{ username }}"; 
+        let currentTarget = ''; 
+        let isChatting = false; 
+
+        const homeScreen = document.getElementById('home-screen');
+        const chatScreen = document.getElementById('chat-screen');
+        const userListContainer = document.getElementById('user-list-container');
         const chatBox = document.getElementById('chat-display');
+        const inputField = document.getElementById('messageInput');
 
-        setInterval(() => {
-            fetch('/get_chats')
-            .then(response => response.json())
-            .then(data => {
-                // Simpan posisi scroll sebelum update
-                const isScrolledToBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
+        // 1. NAVIGASI 
+        
+        function openChat(targetName) {
+            currentTarget = targetName;
+            isChatting = true;
 
-                chatBox.innerHTML = '<div class="text-center text-xs text-gray-400 my-4"><span class="bg-gray-200 px-3 py-1 rounded-full">Mulai percakapan aman P2P</span></div>';
+            document.getElementById('chat-target-name').innerText = targetName;
+            document.getElementById('chat-target-initial').innerText = targetName.charAt(0).toUpperCase();
+
+            homeScreen.classList.add('hidden-screen');
+            chatScreen.classList.remove('hidden-screen');
+
+            chatBox.innerHTML = '<div class="text-center text-xs text-gray-400 my-4"><span class="bg-gray-200 px-3 py-1 rounded-full">Mulai percakapan dengan '+targetName+'</span></div>';
+            loadChats();
+        }
+
+        function backToHome() {
+            isChatting = false;
+            currentTarget = '';
+            
+            chatScreen.classList.add('hidden-screen');
+            homeScreen.classList.remove('hidden-screen');
+        }
+
+        // 2. FITUR AMBIL LIST USER (LOBBY)
+
+        function fetchOnlineUsers() {
+            if (isChatting) return; 
+
+            fetch('/get_active_users')
+            .then(res => res.json())
+            .then(users => {
+                userListContainer.innerHTML = ''; 
                 
-                data.forEach(chat => {
-                    const div = document.createElement('div');
-                    if (chat.type === 'out') {
-                        div.className = "self-end bg-rose-600 text-white max-w-[80%] px-4 py-2 rounded-2xl rounded-tr-none shadow-sm text-sm";
-                        div.innerHTML = `<b>Anda:</b> ${chat.msg.split(': ')[1] || chat.msg}`;
-                    } else {
-                        div.className = "self-start bg-white text-gray-800 max-w-[80%] px-4 py-2 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 text-sm";
-                        div.innerHTML = `<b class="text-rose-600 text-xs block mb-1">${chat.sender}</b> ${chat.msg}`;
-                    }
-                    chatBox.appendChild(div);
-                });
-                
-                if(isScrolledToBottom) {
-                   chatBox.scrollTop = chatBox.scrollHeight;
+                const others = users.filter(u => u.username !== myUsername);
+
+                if (others.length === 0) {
+                    userListContainer.innerHTML = `
+                        <div class="text-center py-8 text-gray-400">
+                            <p class="text-sm">Belum ada user lain.</p>
+                            <p class="text-xs mt-1">Menunggu teman join...</p>
+                        </div>`;
+                    return;
                 }
-            });
-        }, 1000);
 
-        document.getElementById("messageInput").addEventListener("keyup", function(event) {
-            if (event.key === "Enter") { sendMessage(); }
-        });
+                others.forEach(user => {
+                    const initial = user.username.charAt(0).toUpperCase();
+                    const card = `
+                        <div onclick="openChat('${user.username}')" class="bg-white p-3 rounded-xl border border-gray-100 shadow-sm flex items-center gap-3 cursor-pointer hover:bg-rose-50 hover:border-rose-200 transition group">
+                            <div class="relative shrink-0">
+                                <div class="w-10 h-10 bg-gradient-to-br from-rose-100 to-rose-200 text-rose-600 rounded-full flex items-center justify-center font-bold shadow-inner">
+                                    ${initial}
+                                </div>
+                                <div class="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-semibold text-gray-800 truncate group-hover:text-rose-700">${user.username}</h3>
+                                <p class="text-xs text-gray-400 font-mono truncate">${user.ip}</p>
+                            </div>
+                            <div class="text-gray-300 group-hover:text-rose-500">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z" />
+                                </svg>
+                            </div>
+                        </div>
+                    `;
+                    userListContainer.innerHTML += card;
+                });
+            })
+            .catch(err => console.error("Gagal ambil user:", err));
+        }
+
+        // 3. FITUR CHAT 
+
+        function loadChats() {
+            if (!isChatting) return; 
+
+            fetch('/get_chats')
+            .then(res => res.json())
+            .then(allChats => {
+                const isAtBottom = chatBox.scrollHeight - chatBox.scrollTop <= chatBox.clientHeight + 100;
+                
+
+                chatBox.innerHTML = '<div class="text-center text-xs text-gray-400 my-4"><span class="bg-gray-200 px-3 py-1 rounded-full">Chat dengan '+currentTarget+'</span></div>';
+
+                allChats.forEach(chat => {
+                    let shouldShow = false;
+                    let isMe = false;
+                    let displayMsg = chat.msg;
+
+                    if (chat.type === 'out') {
+                        if (chat.msg.startsWith(`Ke ${currentTarget}:`)) {
+                            shouldShow = true;
+                            isMe = true;
+                            displayMsg = chat.msg.split(`Ke ${currentTarget}: `)[1]; 
+                        }
+                    } else {
+                        if (chat.sender === currentTarget) {
+                            shouldShow = true;
+                            isMe = false;
+                        }
+                    }
+
+                    if (shouldShow) {
+                        const div = document.createElement('div');
+                        if (isMe) {
+                            div.className = "self-end bg-rose-600 text-white max-w-[80%] px-4 py-2 rounded-2xl rounded-tr-none shadow-sm text-sm";
+                            div.innerHTML = displayMsg;
+                        } else {
+                            div.className = "self-start bg-white text-gray-800 max-w-[80%] px-4 py-2 rounded-2xl rounded-tl-none shadow-sm border border-gray-200 text-sm";
+                            div.innerHTML = displayMsg;
+                        }
+                        chatBox.appendChild(div);
+                    }
+                });
+
+                if (isAtBottom) chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
 
         function sendMessage() {
-            const target = document.getElementById('targetUser').value;
-            const msg = document.getElementById('messageInput').value;
-
-            if(!target || !msg) return; 
+            const msg = inputField.value;
+            if (!msg || !currentTarget) return;
 
             fetch('/send_message', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ target: target, message: msg })
+                body: JSON.stringify({ target: currentTarget, message: msg })
             })
             .then(res => res.json())
             .then(data => {
                 if(data.status === 'success') {
-                    document.getElementById('messageInput').value = '';
+                    inputField.value = '';
+                    loadChats(); 
                 } else {
-                    alert("Gagal: " + data.msg);
+                    alert("Gagal kirim: " + data.msg);
                 }
             });
         }
+
+        inputField.addEventListener("keyup", function(e) {
+            if (e.key === "Enter") sendMessage();
+        });
+
+        setInterval(fetchOnlineUsers, 2000);
+        setInterval(loadChats, 1000);
+
+        fetchOnlineUsers();
+
     </script>
 </body>
 </html>

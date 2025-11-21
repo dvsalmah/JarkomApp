@@ -6,7 +6,7 @@ import time
 
 app = Flask(__name__)
 
-#konfig user
+#konfig client
 print("=== KONFIGURASI CLIENT ===")
 MY_USERNAME = input("Masukkan Username: ")
 MY_P2P_PORT = int(input("Masukkan Port untuk Chat P2P (cth: 6000): "))
@@ -28,7 +28,13 @@ def p2p_listener():
         while True:
             client, addr = server_sock.accept()
             data = client.recv(1024).decode()
-            chat_history.append({"sender": "TEMAN", "msg": data, "type": "in"})
+            if ":" in data:
+                sender_name = data.split(":")[0]
+                msg_content = data.split(":", 1)[1]
+                chat_history.append({"sender": sender_name, "msg": msg_content, "type": "in"})
+            else:
+                chat_history.append({"sender": "Unknown", "msg": data, "type": "in"})
+                
             client.close()
     except Exception as e:
         print(f"[ERROR Listener] {e}")
@@ -47,6 +53,7 @@ def register_dns():
     except Exception as e:
         print(f"[ERROR DNS] {e}")
 
+
 @app.route('/')
 def index():
     return render_template('index.html', username=MY_USERNAME, ip=MY_IP, port=MY_P2P_PORT)
@@ -54,6 +61,26 @@ def index():
 @app.route('/get_chats')
 def get_chats():
     return jsonify(chat_history)
+
+@app.route('/get_active_users')
+def get_active_users():
+    try:
+        sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        sock.settimeout(2) 
+        
+        request_payload = {"type": "GET_USERS"}
+        sock.sendto(json.dumps(request_payload).encode(), (DNS_SERVER_IP, DNS_PORT))
+        
+        data, _ = sock.recvfrom(4096)
+        response = json.loads(data.decode())
+        
+        users = response.get('users', [])
+        
+        
+        return jsonify(users)
+    except Exception as e:
+        print(f"[ERROR get_users] {e}")
+        return jsonify([]) # Return kosong kalau error
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
@@ -76,6 +103,7 @@ def send_message():
             
             tcp_sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             tcp_sock.connect((target_ip, target_port))
+            
             full_msg = f"{MY_USERNAME}: {message}"
             tcp_sock.send(full_msg.encode())
             tcp_sock.close()
@@ -83,7 +111,7 @@ def send_message():
             chat_history.append({"sender": "ME", "msg": f"Ke {target_user}: {message}", "type": "out"})
             return jsonify({"status": "success"})
         else:
-            return jsonify({"status": "error", "msg": "User tidak ditemukan!"})
+            return jsonify({"status": "error", "msg": "User tidak ditemukan/Offline!"})
             
     except Exception as e:
         return jsonify({"status": "error", "msg": str(e)})
