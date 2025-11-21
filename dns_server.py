@@ -18,8 +18,18 @@ def start_dns_server():
         try:
             # Menerima paket dari client
             data, addr = sock.recvfrom(1024)
+            try:
+                data, addr = sock.recvfrom(1024)
+            except ConnectionResetError:
+                # Ini untuk menangani WinError 10054
+                continue 
+            except OSError as e:
+                if e.winerror == 10054:
+                    continue
+                else:
+                    raise e
+                
             request = json.loads(data.decode())
-            
             response = {}
             command = request.get('type')
             
