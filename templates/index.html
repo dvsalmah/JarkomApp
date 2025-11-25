@@ -108,8 +108,7 @@
         const chatBox = document.getElementById('chat-display');
         const inputField = document.getElementById('messageInput');
 
-        // 1. NAVIGASI 
-        
+        //buka room chat
         function openChat(targetName) {
             currentTarget = targetName;
             isChatting = true;
@@ -132,8 +131,7 @@
             homeScreen.classList.remove('hidden-screen');
         }
 
-        // 2. FITUR AMBIL LIST USER (LOBBY)
-
+        //ambil user online
         function fetchOnlineUsers() {
             if (isChatting) return; 
 
@@ -180,8 +178,7 @@
             .catch(err => console.error("Gagal ambil user:", err));
         }
 
-        // 3. FITUR CHAT 
-
+        //room chat 
         function loadChats() {
             if (!isChatting) return; 
 

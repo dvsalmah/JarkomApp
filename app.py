@@ -80,7 +80,7 @@ def get_active_users():
         return jsonify(users)
     except Exception as e:
         print(f"[ERROR get_users] {e}")
-        return jsonify([]) # Return kosong kalau error
+        return jsonify([]) 
 
 @app.route('/send_message', methods=['POST'])
 def send_message():
